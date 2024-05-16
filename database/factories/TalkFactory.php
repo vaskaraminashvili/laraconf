@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Speaker;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Speaker;
 use App\Models\Talk;
 
 class TalkFactory extends Factory
@@ -23,7 +23,7 @@ class TalkFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(4),
-            'abstract' => $this->faker->text,
+            'abstract' => $this->faker->text(),
             'speaker_id' => Speaker::factory(),
         ];
     }

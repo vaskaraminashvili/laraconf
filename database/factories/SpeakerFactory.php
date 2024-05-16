@@ -21,10 +21,10 @@ class SpeakerFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'email' => $this->faker->safeEmail,
-            'bio' => $this->faker->text,
-            'twitter_handle' => $this->faker->word,
+            'name' => $this->faker->name(),
+            'email' => $this->faker->safeEmail(),
+            'bio' => $this->faker->text(),
+            'twitter_handle' => $this->faker->word(),
         ];
     }
 }
