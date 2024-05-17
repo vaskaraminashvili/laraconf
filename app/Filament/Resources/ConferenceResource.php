@@ -25,17 +25,30 @@ class ConferenceResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
+                    ->default('my conf name')
+                    ->hint('here is hint')
+                    ->helperText('Name of the inpit just')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('description')
+                Forms\Components\RichEditor::make('description')
                     ->required()
+//                    ->disableToolbarButtons(['italic'])
+//                        ->toolbarButtons(['h2', 'bold'])
                     ->maxLength(255),
-                Forms\Components\DateTimePicker::make('start_date')
+                Forms\Components\DatePicker::make('start_date')
+                    ->native(false)
                     ->required(),
-                Forms\Components\DateTimePicker::make('end_date')
+//                Forms\Components\Checkbox::make('is_published')
+//                    ->default(true),
+                Forms\Components\DatePicker::make('end_date')
+                    ->native(false)
                     ->required(),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'published' => 'Published',
+                        'archived' => 'Archived',
+                    ])
+                    ->required(),
                 Forms\Components\TextInput::make('region')
                     ->required()
                     ->maxLength(255),
