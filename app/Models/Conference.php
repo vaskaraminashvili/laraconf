@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\Region;
 
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -51,9 +53,19 @@ class Conference extends Model
     public static function getForm()
     {
         return [
-            Tabs::make()
-            ->tabs([
-                Tabs\Tab::make('Details')
+//            Tabs::make()
+//                ->tabs([
+//                    Tabs\Tab::make('Details')
+//                        ->schema([
+//
+//                        ])
+//                ]),
+            Section::make('Conference Details')
+                ->collapsible()
+//                ->aside()
+                ->description('test text')
+//                ->columns(['md' => 2 , 'lg' => 3])
+                ->columns(2)
                 ->schema([
                     TextInput::make('name')
                         ->columnSpanFull()
@@ -88,18 +100,8 @@ class Conference extends Model
                             Toggle::make('is_published')
                                 ->default(true),
                         ])
-                ])
-            ]),
-//            Section::make('Conference Details')
-//                ->collapsible()
-////                ->aside()
-//                ->description('test text')
-////                ->columns(['md' => 2 , 'lg' => 3])
-//                ->columns(2)
-//                ->schema([
-//
 
-//                ]),
+                ]),
             Section::make('Location')
                 ->columns(2)
                 ->schema([
@@ -117,7 +119,25 @@ class Conference extends Model
                         }),
                 ]),
 
+            Actions::make([
+                Action::make('star')
+                    ->label('Fill with factory data')
+                    ->icon('heroicon-m-star')
+                    ->visible(function (string $operation){
+                        if ($operation !== 'create'){
+                            return false;
+                        }
+                        if (!app()->environment('local')){
+                            return false;
+                        }
+                        return true;
+                    })
+                    ->action(function ($livewire) {
+                        $data = Conference::factory()->make()->toArray();
+                        $livewire->form->fill($data);
 
+                    }),
+            ]),
             CheckboxList::make('speakers')
                 ->relationship('speakers', 'name')
                 ->options(
