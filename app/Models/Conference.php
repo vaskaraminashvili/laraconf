@@ -7,9 +7,11 @@ use App\Enums\Region;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -49,57 +51,78 @@ class Conference extends Model
     public static function getForm()
     {
         return [
-                Section::make('Conference Details')
-                    ->columns(2)
-                    ->schema([
-                        TextInput::make('name')
-                            ->columnSpanFull()
-                            ->required()
+            Tabs::make()
+            ->tabs([
+                Tabs\Tab::make('Details')
+                ->schema([
+                    TextInput::make('name')
+                        ->columnSpanFull()
+                        ->required()
+                        ->default('my conf name')
+                        ->hint('here is hint')
+                        ->helperText('Name of the inpit just')
+                        ->maxLength(255),
+                    RichEditor::make('description')
+                        ->columnSpanFull()
+                        ->required()
+                        //                    ->disableToolbarButtons(['italic'])
+                        //                        ->toolbarButtons(['h2', 'bold'])
+                        ->maxLength(255),
+                    DateTimePicker::make('start_date')
+                        ->native(false)
+                        ->required(),
+                    DateTimePicker::make('end_date')
+                        ->native(false)
+                        ->required(),
+                    Fieldset::make('Status')
+                        ->columns(1)
+                        ->schema([
 
-                            ->default('my conf name')
-                            ->hint('here is hint')
-                            ->helperText('Name of the inpit just')
-                            ->maxLength(255),
-                        RichEditor::make('description')
-                            ->columnSpanFull()
-                            ->required()
-        //                    ->disableToolbarButtons(['italic'])
-        //                        ->toolbarButtons(['h2', 'bold'])
-                            ->maxLength(255),
-                        DateTimePicker::make('start_date')
-                            ->native(false)
-                            ->required(),
-                        DateTimePicker::make('end_date')
-                            ->native(false)
-                            ->required(),
+                            Select::make('status')
+                                ->options([
+                                    'draft' => 'Draft',
+                                    'published' => 'Published',
+                                    'archived' => 'Archived',
+                                ])
+                                ->required(),
+                            Toggle::make('is_published')
+                                ->default(true),
+                        ])
+                ])
+            ]),
+//            Section::make('Conference Details')
+//                ->collapsible()
+////                ->aside()
+//                ->description('test text')
+////                ->columns(['md' => 2 , 'lg' => 3])
+//                ->columns(2)
+//                ->schema([
+//
 
-                    ]),
-                Toggle::make('is_published')
-                    ->default(true),
-                Select::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'published' => 'Published',
-                        'archived' => 'Archived',
-                    ])
-                    ->required(),
-                Select::make('region')
-                    ->live()
-                    ->enum(Region::class)
-                    ->options(Region::class),
-                Select::make('venue_id')
-                    ->searchable()
-                    ->editOptionForm(Venue::getForm())
-                    ->createOptionForm(Venue::getForm())
-                    ->preload()
-                    ->relationship('venue', 'name', modifyQueryUsing: function (Builder $query , Get $get){
-                        return $query->where('region', $get('region'));
-                    }),
-                CheckboxList::make('speakers')
+//                ]),
+            Section::make('Location')
+                ->columns(2)
+                ->schema([
+                    Select::make('region')
+                        ->live()
+                        ->enum(Region::class)
+                        ->options(Region::class),
+                    Select::make('venue_id')
+                        ->searchable()
+                        ->editOptionForm(Venue::getForm())
+                        ->createOptionForm(Venue::getForm())
+                        ->preload()
+                        ->relationship('venue', 'name', modifyQueryUsing: function (Builder $query, Get $get) {
+                            return $query->where('region', $get('region'));
+                        }),
+                ]),
+
+
+            CheckboxList::make('speakers')
                 ->relationship('speakers', 'name')
                 ->options(
                     Speaker::all()->pluck('name', 'id')
                 )
-            ];
+        ];
     }
 }
