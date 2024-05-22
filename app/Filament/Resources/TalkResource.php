@@ -3,11 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Enums\TalkLength;
+use App\Enums\TalkStatus;
 use App\Filament\Resources\TalkResource\Pages;
 use App\Filament\Resources\TalkResource\RelationManagers;
 use App\Models\Talk;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -92,12 +94,51 @@ class TalkResource extends Resource
                     })
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->slideOver(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('approve')
+                        ->visible(function ($record) {
+                            return $record->status === TalkStatus::SUBMITTED;
+                        })
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->action(function (Talk $record) {
+                            $record->approve();
+                        })->after(function () {
+                            Notification::make()
+                                ->duration(1000)
+                                ->success()->title('Talk Approved')->body('the speak has been approved')->send();
+                        }),
+                    Tables\Actions\Action::make('reject')
+                        ->visible(function ($record) {
+                            return $record->status === TalkStatus::SUBMITTED;
+                        })
+                        ->requiresConfirmation()
+                        ->icon('heroicon-o-no-symbol')
+                        ->color('danger')
+                        ->action(function (Talk $record) {
+                            $record->reject();
+                        })->after(function () {
+                            Notification::make()
+                                ->duration(1000)
+                                ->danger()->title('Talk Rejectetd')->body('the speak has been approved')->send();
+                        })
+                ]),
+
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('export')
+                    ->tooltip('will export all that is seen')
+                    ->action(function ($livewire) {
+                        dd($livewire->getFilteredTableQuery()->count());
+                    })
             ]);
     }
 
@@ -113,7 +154,7 @@ class TalkResource extends Resource
         return [
             'index' => Pages\ListTalks::route('/'),
             'create' => Pages\CreateTalk::route('/create'),
-            'edit' => Pages\EditTalk::route('/{record}/edit'),
+//            'edit' => Pages\EditTalk::route('/{record}/edit'),
         ];
     }
 }
